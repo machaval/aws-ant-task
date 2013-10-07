@@ -8,32 +8,42 @@ import com.amazonaws.services.cloudfront.model.CreateInvalidationRequest;
 import com.amazonaws.services.cloudfront.model.CreateInvalidationResult;
 import com.amazonaws.services.cloudfront.model.InvalidationBatch;
 import com.amazonaws.services.cloudfront.model.Paths;
+
 import org.apache.tools.ant.BuildException;
 
 import java.util.Collection;
 import java.util.Vector;
 
-public class CloudFront extends AWSTask {
+public class CloudFront extends AWSTask
+{
+
     private String distibutionId;
     private String pathsString = "\0";
     boolean fail = false;
 
     Vector<Delete> delete = new Vector<Delete>();
 
-    public void setDistributionId(String distributionId) {
+    public void setDistributionId(String distributionId)
+    {
         this.distibutionId = distributionId;
     }
 
-    public void setPathsString(String pathsString) {
+    public void setPathsString(String pathsString)
+    {
         this.pathsString = pathsString;
     }
 
-    public void setFail(boolean b) {
+    public void setFail(boolean b)
+    {
         fail = b;
     }
 
-    public void execute() {
-        if (fail) throw new BuildException("Fail requested.");
+    public void execute()
+    {
+        if (fail)
+        {
+            throw new BuildException("Fail requested.");
+        }
 
         log("Executing invalidation for key : " + this.getKey() + " on distribution id: " + this.distibutionId);
 
@@ -50,17 +60,22 @@ public class CloudFront extends AWSTask {
         int i;
         String path;
 
-        if (pathsString != "\0") {
+        if (pathsString != "\0")
+        {
             String[] parts = pathsString.split(",");
             pathsSize = parts.length;
-            for (i = 0; i < pathsSize; i++) {
+            for (i = 0; i < pathsSize; i++)
+            {
                 path = parts[i];
                 log("Invalidation for path: " + path);
                 paths.add(path);
             }
-        } else {
+        }
+        else
+        {
             pathsSize = this.delete.size();
-            for (i = 0; i < pathsSize; i++) {
+            for (i = 0; i < pathsSize; i++)
+            {
                 path = this.delete.get(i).getPath();
                 log("Invalidation for path: " + this.delete.get(i).getPath());
                 paths.add(path);
@@ -81,24 +96,30 @@ public class CloudFront extends AWSTask {
         log("Invalidation result: " + result.getInvalidation().getStatus());
     }
 
-    public Delete createDelete() {
+    public Delete createDelete()
+    {
         Delete file = new Delete();
         this.delete.add(file);
         return file;
     }
 
-    public class Delete {
+    public class Delete
+    {
+
         String path;
 
-        public Delete() {
+        public Delete()
+        {
 
         }
 
-        public void setPath(String path) {
+        public void setPath(String path)
+        {
             this.path = path;
         }
 
-        public String getPath() {
+        public String getPath()
+        {
             return path;
         }
     }

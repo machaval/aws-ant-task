@@ -8,7 +8,8 @@ import org.apache.tools.ant.Task;
  *
  * @author TODO
  */
-public class AWSTask extends Task {
+public class AWSTask extends Task
+{
 
     /**
      * AWS access key.
@@ -25,24 +26,29 @@ public class AWSTask extends Task {
      */
     protected String region = "US";
 
-    public void setKey(String key) {
+    public void setKey(String key)
+    {
         this.key = key;
     }
 
 
-    public void setSecret(String secret) {
+    public void setSecret(String secret)
+    {
         this.secret = secret;
     }
 
-    public void setRegion(String region) {
+    public void setRegion(String region)
+    {
         this.region = region;
     }
 
-    protected String getKey() {
+    protected String getKey()
+    {
         return this.key;
     }
 
-    protected String getSecret() {
+    protected String getSecret()
+    {
         return this.secret;
     }
 }

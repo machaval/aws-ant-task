@@ -11,8 +11,9 @@ import junit.framework.TestCase;
  */
 public class S3PutTaskTest extends TestCase
 {
-	public void testEasy()
-	{
-		TestCase.assertTrue(true);
-	}
+
+    public void testEasy()
+    {
+        TestCase.assertTrue(true);
+    }
 }

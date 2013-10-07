@@ -8,7 +8,8 @@ package it.corley.ant;
  * @author Tadeusz Kozak
  *         Created at 10:30 10.05.12
  */
-public class ContentTypeMapping {
+public class ContentTypeMapping
+{
 
     /**
      * File extension part of the mapping.
@@ -20,27 +21,33 @@ public class ContentTypeMapping {
      */
     private String contentType;
 
-    public ContentTypeMapping() {
+    public ContentTypeMapping()
+    {
     }
 
-    public ContentTypeMapping(String extension, String contentType) {
+    public ContentTypeMapping(String extension, String contentType)
+    {
         this.extension = extension;
         this.contentType = contentType;
     }
 
-    public String getExtension() {
+    public String getExtension()
+    {
         return extension;
     }
 
-    public void setExtension(String extension) {
+    public void setExtension(String extension)
+    {
         this.extension = extension;
     }
 
-    public String getContentType() {
+    public String getContentType()
+    {
         return contentType;
     }
 
-    public void setContentType(String contentType) {
+    public void setContentType(String contentType)
+    {
         this.contentType = contentType;
     }
 }

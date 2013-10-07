@@ -9,16 +9,17 @@ import com.amazonaws.services.s3.model.StorageClass;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.Upload;
 
+import java.io.File;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.types.FileSet;
 
-import java.io.File;
-import java.util.LinkedList;
-import java.util.List;
-
-public class S3PutTask extends AWSTask {
+public class S3PutTask extends AWSTask
+{
 
     /**
      * Boolean flag defining whether the put operation should set the ACL to publicly readable for each uploaded item.
@@ -39,14 +40,14 @@ public class S3PutTask extends AWSTask {
      * Content-Type to be set globally for each uploaded file.
      */
     private String contentType;
-    
+
     /**
      * Cache-Control to be set globally for each uploaded file.
      */
     private String cacheControl;
-    
+
     private String contentEncoding;
-    
+
     private String endPoint = "s3-eu-west-1.amazonaws.com";
 
     /**
@@ -68,13 +69,14 @@ public class S3PutTask extends AWSTask {
      * Whether to use reduced redundancy storage.
      */
     private boolean reducedRedundancy;
-    
+
     /**
      * Executes the task.
      *
      * @see org.apache.tools.ant.Task#execute()
      */
-    public void execute() {
+    public void execute()
+    {
         validateConfiguration();
         AWSCredentials credential = new BasicAWSCredentials(getKey(), getSecret());
         final TransferManager transferManager = new TransferManager(credential);
@@ -82,27 +84,36 @@ public class S3PutTask extends AWSTask {
         transferManager.getAmazonS3Client().setEndpoint(getEndPoint());
 
         String path;
-        if (dest == null) {
+        if (dest == null)
+        {
             path = "";
-        } else {
+        }
+        else
+        {
             path = dest.trim();
-            if ((! path.isEmpty()) && (! path.endsWith("/"))) {
+            if ((!path.isEmpty()) && (!path.endsWith("/")))
+            {
                 path = path + "/";
             }
-            if (path.startsWith("/")) {
+            if (path.startsWith("/"))
+            {
                 path = path.substring(1);
             }
         }
 
-        for (FileSet fs : filesets) {
-            try {
+        for (FileSet fs : filesets)
+        {
+            try
+            {
                 DirectoryScanner ds = fs.getDirectoryScanner(getProject());
                 String[] files = ds.getIncludedFiles();
                 File d = fs.getDir(getProject());
 
-                if (files.length > 0) {
+                if (files.length > 0)
+                {
                     log("Uploading " + files.length + " file(s) from " + d.getAbsolutePath());
-                    for (String filePath : files) {
+                    for (String filePath : files)
+                    {
                         String cleanFilePath = filePath.replace('\\', '/');
                         File file = new File(d, cleanFilePath);
                         PutObjectRequest por = new PutObjectRequest(bucket, path + cleanFilePath, file);
@@ -115,12 +126,16 @@ public class S3PutTask extends AWSTask {
                         log("File: " + cleanFilePath + " copied to bucket: " + bucket + " destination: " + path);
                     }
                 }
-            } catch (BuildException be) {
+            }
+            catch (BuildException be)
+            {
                 // directory doesn't exist or is not readable
                 log("Could not upload file(s) to Amazon S3PutTask");
                 log(be.getMessage());
                 throw be;
-            } catch (InterruptedException e) {
+            }
+            catch (InterruptedException e)
+            {
                 log("Upload interrupted");
                 log(e.getMessage());
                 throw new BuildException(e);
@@ -128,59 +143,73 @@ public class S3PutTask extends AWSTask {
         }
     }
 
-    private void applyMetadata(File file, PutObjectRequest por) {
+    private void applyMetadata(File file, PutObjectRequest por)
+    {
         ObjectMetadata metadata = new ObjectMetadata();
-        if (isPublicRead()) {
+        if (isPublicRead())
+        {
             por.setCannedAcl(CannedAccessControlList.PublicRead);
         }
-        if (isReducedRedundancy()) {
+        if (isReducedRedundancy())
+        {
             por.setStorageClass(StorageClass.ReducedRedundancy);
         }
         boolean metadataSet = false;
         String fileName = file.getName();
-        for (ContentTypeMapping mapping : contentTypeMappings) {
-            if (fileName.endsWith(mapping.getExtension())) {
+        for (ContentTypeMapping mapping : contentTypeMappings)
+        {
+            if (fileName.endsWith(mapping.getExtension()))
+            {
                 metadata.setContentType(mapping.getContentType());
                 metadataSet = true;
                 break;
             }
         }
-        if (contentType != null && !metadataSet) {
+        if (contentType != null && !metadataSet)
+        {
             metadata.setContentType(contentType);
         }
         boolean cacheControlMetadataSet = false;
-        for (CacheControlMapping mapping : cacheControlMappings) {
-            if (fileName.endsWith(mapping.getExtension())) {
+        for (CacheControlMapping mapping : cacheControlMappings)
+        {
+            if (fileName.endsWith(mapping.getExtension()))
+            {
                 metadata.setCacheControl(mapping.getMaxAge());
                 cacheControlMetadataSet = true;
                 break;
             }
         }
         //TODO: add single file metadata cache-control
-        if (cacheControl != null && !cacheControlMetadataSet) {
-        	metadata.setCacheControl(cacheControl);
+        if (cacheControl != null && !cacheControlMetadataSet)
+        {
+            metadata.setCacheControl(cacheControl);
         }
-        
+
         boolean contentEncodingMetadataSet = false;
-        for (ContentEncodingMapping mapping : contentEncodingMappings) {
-			if (fileName.endsWith(mapping.getExtension())) {
-				metadata.setContentEncoding(mapping.getEncoding());
-				contentEncodingMetadataSet = true;
-				break;
-			}
-		}
-        if (contentEncoding != null && !contentEncodingMetadataSet) {
-        	metadata.setContentEncoding(contentEncoding);
+        for (ContentEncodingMapping mapping : contentEncodingMappings)
+        {
+            if (fileName.endsWith(mapping.getExtension()))
+            {
+                metadata.setContentEncoding(mapping.getEncoding());
+                contentEncodingMetadataSet = true;
+                break;
+            }
         }
-        
+        if (contentEncoding != null && !contentEncodingMetadataSet)
+        {
+            metadata.setContentEncoding(contentEncoding);
+        }
+
         por.setMetadata(metadata);
     }
 
-    private void validateConfiguration() {
-        if (bucket == null) {
+    private void validateConfiguration()
+    {
+        if (bucket == null)
+        {
             throw new BuildException("Target bucket not given. Cannot upload");
         }
-//        TODO add other properties
+        //        TODO add other properties
     }
 
     /**
@@ -189,68 +218,84 @@ public class S3PutTask extends AWSTask {
      * ===============================================
      */
 
-    public boolean isPublicRead() {
+    public boolean isPublicRead()
+    {
         return publicRead;
     }
 
-    public void setPublicRead(boolean publicRead) {
+    public void setPublicRead(boolean publicRead)
+    {
         this.publicRead = publicRead;
     }
 
-    public void setBucket(String bucket) {
+    public void setBucket(String bucket)
+    {
         this.bucket = bucket;
     }
 
-    public void setDest(String dest) {
+    public void setDest(String dest)
+    {
         this.dest = dest;
     }
 
-    public void setContentType(String contentType) {
+    public void setContentType(String contentType)
+    {
         this.contentType = contentType;
     }
-    
-    public void setContentEncoding(String contentEncoding) {
-    	this.contentEncoding = contentEncoding;
+
+    public void setContentEncoding(String contentEncoding)
+    {
+        this.contentEncoding = contentEncoding;
     }
 
     /**
      * Set the cache control max-age=seconds
-     * 
+     *
      * @param cacheControl
      */
-    public void setCacheControl(String cacheControl) {
-    	this.cacheControl = cacheControl;
+    public void setCacheControl(String cacheControl)
+    {
+        this.cacheControl = cacheControl;
     }
 
-    public void addContentTypeMapping(ContentTypeMapping mapping) {
+    public void addContentTypeMapping(ContentTypeMapping mapping)
+    {
         contentTypeMappings.add(mapping);
     }
-    
-    public void addCacheControlMapping(CacheControlMapping mapping) {
-    	cacheControlMappings.add(mapping);
-    }
-    public void addContentEncodingMapping(ContentEncodingMapping mapping) {
-    	contentEncodingMappings.add(mapping);
+
+    public void addCacheControlMapping(CacheControlMapping mapping)
+    {
+        cacheControlMappings.add(mapping);
     }
 
-    public void addFileset(FileSet set) {
+    public void addContentEncodingMapping(ContentEncodingMapping mapping)
+    {
+        contentEncodingMappings.add(mapping);
+    }
+
+    public void addFileset(FileSet set)
+    {
         filesets.add(set);
     }
 
-    public boolean isReducedRedundancy() {
+    public boolean isReducedRedundancy()
+    {
         return reducedRedundancy;
     }
 
-    public void setReducedRedundancy(boolean reducedRedundancy) {
+    public void setReducedRedundancy(boolean reducedRedundancy)
+    {
         this.reducedRedundancy = reducedRedundancy;
     }
 
-	public String getEndPoint() {
-		return endPoint;
-	}
+    public String getEndPoint()
+    {
+        return endPoint;
+    }
 
-	public void setEndPoint(String endPoint) {
-		this.endPoint = endPoint;
-	}
+    public void setEndPoint(String endPoint)
+    {
+        this.endPoint = endPoint;
+    }
 
 }

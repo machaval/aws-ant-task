@@ -116,7 +116,7 @@
             <version>1.5.2</version>
         </dependency>
 
-       <dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.8.1</version>
@@ -124,7 +124,7 @@
         </dependency>
     </dependencies>
     <organization>
-    	<name>Corley S.r.l.</name>
-    	<url>http://www.corley.it</url>
+        <name>Corley S.r.l.</name>
+        <url>http://www.corley.it</url>
     </organization>
 </project>
